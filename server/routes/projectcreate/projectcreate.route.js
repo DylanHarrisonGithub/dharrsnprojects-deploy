@@ -12,7 +12,7 @@ const requestFilter = [
     'features',
     'description',
     'media',
-    'projectType'
+    'projecttype'
 ];
 exports.default = async (request) => {
     // precaution to filter any additional params that were provided with request

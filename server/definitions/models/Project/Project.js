@@ -14,7 +14,7 @@ const ProjectModel = {
         features: `TEXT`,
         description: `TEXT`,
         media: `TEXT`,
-        projectType: `TEXT`,
+        projecttype: `TEXT`,
         search: `TEXT`,
         PRIMARY: `KEY (id)`,
     },
@@ -28,7 +28,7 @@ const ProjectModel = {
         features: Object.assign(Object.assign({}, schemas_1.default.sentence), { attributes: Object.assign(Object.assign({}, schemas_1.default.sentence.attributes), { array: { minLength: 0 } }) }),
         description: schemas_1.default.paragraph,
         media: { type: 'string', attributes: { required: true, array: { minLength: 0 } } },
-        projectType: { type: ['app', 'demo', 'webapp'], attributes: { required: true } },
+        projecttype: { type: ['app', 'demo', 'webapp'], attributes: { required: true } },
         search: Object.assign(Object.assign({}, schemas_1.default.dbSafeString), { attributes: Object.assign(Object.assign({}, schemas_1.default.dbSafeString.attributes), { required: false }) }),
     }
 };

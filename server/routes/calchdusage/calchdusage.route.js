@@ -7,10 +7,9 @@ const file_service_1 = __importDefault(require("../../services/file/file.service
 const config_1 = __importDefault(require("../../config/config"));
 exports.default = async (request) => {
     const rootSize = await file_service_1.default.getDirectorySize('');
-    const mediaSize = await file_service_1.default.getDirectorySize('public/media');
-    const tracksSize = await file_service_1.default.getDirectorySize('public/tracks');
-    //&& rootSize.body  && mediaSize.body  && tracksSize.body
-    if (!(rootSize.success && mediaSize.success && tracksSize.success)) {
+    const mediaSize = await file_service_1.default.getDirectorySize('public');
+    //&& rootSize.body  && mediaSize.body 
+    if (!(rootSize.success && mediaSize.success)) {
         return new Promise(res => res({
             code: 500,
             json: {
@@ -18,8 +17,7 @@ exports.default = async (request) => {
                 messages: [
                     `SERVER - ROUTES - CALCHDUSAGE - Error calculating hd usage.`,
                     ...rootSize.messages,
-                    ...mediaSize.messages,
-                    ...tracksSize.messages
+                    ...mediaSize.messages
                 ]
             }
         }));
@@ -31,13 +29,11 @@ exports.default = async (request) => {
             messages: [
                 `SERVER - ROUTES - CALCHDUSAGE - HD usage successfully calculated.`,
                 ...rootSize.messages,
-                ...mediaSize.messages,
-                ...tracksSize.messages
+                ...mediaSize.messages
             ],
             body: {
                 rootSizeBytes: rootSize.body,
                 mediaSizeBytes: mediaSize.body,
-                tracksSizeBytes: tracksSize.body,
                 maxSizeGB: config_1.default.MAX_HD_SIZE_GB
             }
         }
