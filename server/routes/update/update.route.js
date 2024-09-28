@@ -97,6 +97,7 @@ exports.default = async (request) => {
         if (status.includes('Your branch is behind')) {
             try {
                 const rDir = path.resolve(config_1.default.ROOT_DIR);
+                await exec.execSync(`sudo chmod +x update.sh`);
                 const child = exec.spawn('sudo', ['sh', 'update.sh'], { detached: true, stdio: 'inherit', shell: true, cwd: rDir });
                 child.unref();
                 return new Promise(res => res({
