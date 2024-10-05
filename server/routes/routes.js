@@ -109,7 +109,7 @@ const routes = {
     update: {
         method: ['POST'],
         contentType: "application/json",
-        privilege: ['user'],
+        privilege: ['guest'],
         schema: update_schema_1.default,
         route: update_route_1.default
     },
