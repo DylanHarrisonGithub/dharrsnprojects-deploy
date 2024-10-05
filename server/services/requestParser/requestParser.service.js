@@ -43,8 +43,10 @@ const requestParser = (() => {
                 route: route,
                 host: req.get('Host') || '',
                 token: token,
+                headers: req.headers,
                 params: (req.method === 'GET' || req.method === 'DELETE') ? req.query : req.body,
-                files: req.files
+                files: req.files,
+                fullRequest: req
             }
         }));
     };

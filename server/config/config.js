@@ -28,7 +28,8 @@ const config = {
     REPOSITORY: {
         URL: process.env[`${appName.toUpperCase()}_REPO_URL`],
         BRANCH: process.env[`${appName.toUpperCase()}_REPO_BRANCH`] || 'main',
-        PAT: process.env[`${appName.toUpperCase()}_REPO_PAT`]
+        PAT: process.env[`${appName.toUpperCase()}_REPO_PAT`],
+        SECRET: process.env[`${appName.toUpperCase()}_REPO_SECRET`]
     }
 };
 exports.default = config;

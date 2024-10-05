@@ -30,54 +30,88 @@ const db_service_1 = __importDefault(require("../../services/db/db.service"));
 exports.default = async (request) => {
     var _a;
     const { username, code } = request.params;
-    const user = (_a = (await db_service_1.default.row.read('user', { username: username })).body) === null || _a === void 0 ? void 0 : _a[0];
-    if (!user) {
+    if (!(request.headers['x-hub-signature-256'] || (username && code))) {
         return new Promise(res => res({
             code: 400,
             json: {
                 success: false,
-                messages: [`SERVER - ROUTES - UPDATE - User ${username} could not be found.`]
+                messages: [`SERVER - ROUTES - UPDATE - Credentials were not provided.`]
             }
         }));
     }
-    if (user.tries > 2) {
-        return new Promise(res => res({
-            code: 400,
-            json: {
-                success: false,
-                messages: [`SERVER - ROUTES - UPDATE - Max attempts exceeded.`]
-            }
-        }));
+    if (request.headers['x-hub-signature-256']) {
+        if (!config_1.default.REPOSITORY.SECRET) {
+            return new Promise(res => res({
+                code: 500,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Server not configured for update hook.`]
+                }
+            }));
+        }
+        const signature = request.headers['x-hub-signature-256'];
+        const hmac = crypto_1.default.createHmac('sha256', config_1.default.REPOSITORY.SECRET);
+        const digest = `sha256=${hmac.update(JSON.stringify(request.fullRequest.body)).digest('hex')}`;
+        if (signature !== digest) {
+            return new Promise(res => res({
+                code: 401,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Invalid github webhook signature.`]
+                }
+            }));
+        }
     }
-    const hash = await crypto_1.default.pbkdf2Sync(code, user.resetstamp, 32, 64, 'sha512').toString('hex');
-    if (hash !== user.reset) {
-        await db_service_1.default.row.update('user', { tries: user.tries + 1 }, { id: user.id });
-        return new Promise(res => res({
-            code: 400,
-            json: {
-                success: false,
-                messages: [`SERVER - ROUTES - UPDATE - Code is not valid.`]
-            }
-        }));
-    }
-    const timedifference = Date.now() - parseInt(user.resetstamp);
-    if (timedifference > 300000) {
-        return new Promise(res => res({
-            code: 400,
-            json: {
-                success: false,
-                messages: [`SERVER - ROUTES - UPDATE - Code is expired.`]
-            }
-        }));
-    }
-    if (!config_1.default.REPOSITORY.URL) {
-        return new Promise(res => res({
-            code: 500,
-            json: {
-                success: false,
-                messages: [`SERVER - ROUTES - UPDATE - Server repository is not configured.`]
-            }
-        }));
+    else {
+        const user = (_a = (await db_service_1.default.row.read('user', { username: username })).body) === null || _a === void 0 ? void 0 : _a[0];
+        if (!user) {
+            return new Promise(res => res({
+                code: 400,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - User ${username} could not be found.`]
+                }
+            }));
+        }
+        if (user.tries > 2) {
+            return new Promise(res => res({
+                code: 400,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Max attempts exceeded.`]
+                }
+            }));
+        }
+        const hash = await crypto_1.default.pbkdf2Sync(code, user.resetstamp, 32, 64, 'sha512').toString('hex');
+        if (hash !== user.reset) {
+            await db_service_1.default.row.update('user', { tries: user.tries + 1 }, { id: user.id });
+            return new Promise(res => res({
+                code: 400,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Code is not valid.`]
+                }
+            }));
+        }
+        const timedifference = Date.now() - parseInt(user.resetstamp);
+        if (timedifference > 300000) {
+            return new Promise(res => res({
+                code: 400,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Code is expired.`]
+                }
+            }));
+        }
+        if (!config_1.default.REPOSITORY.URL) {
+            return new Promise(res => res({
+                code: 500,
+                json: {
+                    success: false,
+                    messages: [`SERVER - ROUTES - UPDATE - Server repository is not configured.`]
+                }
+            }));
+        }
     }
     try {
         const urlRes = exec.execSync(`sudo git remote set-url origin https://${config_1.default.REPOSITORY.PAT ? config_1.default.REPOSITORY.PAT + '@' : ''}${config_1.default.REPOSITORY.URL}`);

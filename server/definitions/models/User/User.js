@@ -18,6 +18,19 @@ const UserModel = {
         tries: `NUMERIC`,
         PRIMARY: 'KEY (username)'
     },
-    schema: Object.assign(Object.assign({}, (({ id, username, email, password, otp, privilege }) => ({ id, username, email, password, otp, privilege }))(schemas_1.default)), { avatar: schemas_1.default.imageFilename })
+    schema: Object.assign(Object.assign({}, (({ id, username, email, password, otp, privilege }) => ({ id, username, email, password, otp, privilege }))(schemas_1.default)), { avatar: schemas_1.default.imageFilename }),
 };
+const map = (user) => ({
+    id: `SERIAL`,
+    username: 'TEXT',
+    email: `TEXT`,
+    password: 'TEXT',
+    salt: 'TEXT',
+    privilege: `TEXT`,
+    avatar: `TEXT`,
+    reset: `TEXT`,
+    resetstamp: `TEXT`,
+    tries: `NUMERIC`,
+    PRIMARY: 'KEY (username)'
+});
 exports.default = UserModel;
